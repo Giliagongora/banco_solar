@@ -1,6 +1,6 @@
 // const pool = require("../config/ddbb.js");
 // const errores = require("../errores/errores.js");
-const  {errores}  = require("../errores/errores.js");
+const { errores } = require("../errores/errores.js");
 const { Pool } = require("pg");
 
 const pool = new Pool({
@@ -24,7 +24,9 @@ const agregarUsuario = async (nombre, balance) => {
 
     console.log("Registro agregado : ", res.rows[0]);
   } catch (error) {
-    console.log("error",error, error.message);
+    console.log("error", error, error.message);
+    throw { error: error.message };
+
   }
 };
 
@@ -34,8 +36,7 @@ const obtenerUsuarios = async () => {
     console.log("Usuarios registrados : ", res.rows);
     return res.rows;
   } catch (error) {
-    // console.error('Se produjo un error:', error.status, error.message);
-    console.log("error",error, error.message);
+    console.log("error", error, error.message);
     throw { error: error.message };
   }
 };
@@ -48,7 +49,7 @@ const eliminarUsuario = async (id) => {
     );
     console.log("Usuarios eliminados : ", res.rows);
   } catch (error) {
-    console.log("error",error, error.message);
+    console.log("error", error, error.message);
     throw { error: error.message };
   }
 };
@@ -62,7 +63,7 @@ const actualizarUsuario = async (id, nombre, balance) => {
     console.log("Usuarios actualizado : ", res);
     // return res.rows;
   } catch (error) {
-    console.log("error",error, error.message);
+    console.log("error", error, error.message);
     throw { error: error.message };
   }
 };
@@ -70,55 +71,60 @@ const actualizarUsuario = async (id, nombre, balance) => {
 
 const transferencia = async (emisor, receptor, monto) => {
   try {
-    const res = await pool.query("BEGIN");
-    const cargo = await pool.query(
+    await pool.query("BEGIN");
+    const descontar = await pool.query(
       "UPDATE usuarios SET balance = balance - $1 WHERE id = $2 RETURNING *",
       [monto, emisor]
     ); // Resta el monto ($1) del saldo (balance) del usuario que tiene el ID (id) especificado ($2).
-    console.log("Respuesta de la consulta:", cargo.rows);
-    console.log("Transferencias realizada:", cargo.rows[0]);
-    console.log(cargo);
 
-    
-    const actualAbono = await pool.query(
+    console.log("descontar :::::::::::::::",descontar);
+
+
+    const acreditar = await pool.query(
       "UPDATE usuarios SET balance = balance + $1 WHERE id = $2 RETURNING *",
       [monto, emisor]
     );
-    
-    console.log("Actualización de abono realizada:", actualAbono.rows);
-    console.log(actualAbono);
-    
-    // const actualizarUsuarios = await pool.query(
-    //   "INSERT INTO transferencias  (emisor, receptor, monto, fecha) VALUES ($1, $2, $3, CURRENT_TIMESTAMP) RETURNING *",
-    //   [emisor, receptor, monto]
-    // );
-    
-    // console.log("Actualización de usuario realizada:", actualizarUsuario.rows);
-    // console.log(actualizarUsuarios);
-    
-    // await pool.query("COMMIT");
-    
+    console.log("acreditar :::::::::::::::",acreditar);
+
+    const actualizarUsuarios = await pool.query(
+      "INSERT INTO transferencias  (emisor, receptor, monto, fecha) VALUES ($1, $2, $3, CURRENT_TIMESTAMP) RETURNING *",
+      [emisor, receptor, monto]
+    );
+    console.log("actualizarUsuarios :::::::::::::::",actualizarUsuarios);
+
+    await pool.query("COMMIT");
+    actualizarUsuario();
     // console.log("Commit realizado");
-    
+
     // const abonoConfirmado = await pool.query(actualizarUsuarios);
-    
+
     // console.log("Transferencias registradas:", res.rows[0]);
     // return res.rows;
-    
-
-
   } catch (error) {
-
-    console.log("error",error, error.message);
+    await pool.query("ROLLBACK");
+    console.log("error", error, error.message);
     throw { error: error.message };
   }
-
 };
 
-transferencia(1,55,100);
+// transferencia(61, 55, 100);
 // const emisor = 1; // ID del emisor
 // const receptor = 2; // ID del receptor
 // const monto = 100; // Monto de la transferencia
+
+const transferencias = async (req, res) => {
+  console.log("nombre, balance:::::::",req, res);
+  try {
+    const res = await pool.query("SELECT * FROM transferencias");
+    console.log("Transacciones registradas : ", res.rows);
+    
+    return res.rows;
+  } catch (error) {
+    console.log("error", error, error.message);
+    throw { error: error.message };
+  }
+};
+
 
 
 module.exports = {
@@ -127,6 +133,6 @@ module.exports = {
   obtenerUsuarios,
   eliminarUsuario,
   actualizarUsuario,
-  // transferencias,
+  transferencias,
   transferencia,
 };

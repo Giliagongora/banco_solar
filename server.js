@@ -5,7 +5,7 @@ const {
   obtenerUsuarios,
   eliminarUsuario,
   actualizarUsuario,
-  // transferencias,
+  transferencias,
   transferencia
  } = require("./config/queries");
 
@@ -18,6 +18,8 @@ app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
 
+
+// Crear una ruta GET raíz que devuelva el documento index.html. 
 app.get("/", (req, res) => {
   // res para enviar el archivo index.html al cliente -__dirname es una variable global en Node.js que contiene la ruta del directorio en el que se encuentra el script actual.
   res.sendFile(__dirname + "/index.html");
@@ -83,14 +85,15 @@ app.post("/transferencia", async (req, res) => {
 }); 
 
 
-// app.get("/transferencias", async (req, res) => {
-//   try {
-//     const resultado = await transferencias();
-//     res.status(201).json(resultado);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// });
+app.get("/transferencias", async (req, res) => {
+  const { emisor, receptor, monto } = req.body;
+  try {
+    const resultado = await transferencias();
+    res.status(201).json(resultado);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // app.post("/usuarios", async (req, res) => {
 //   try {
