@@ -1,5 +1,5 @@
-const errores = (error, status, pool) => {
-    // let status;
+const errores = (error, tabla, pool) => {
+    let status;
     let message;
     switch (error) {
         case '22P02':

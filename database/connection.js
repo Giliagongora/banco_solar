@@ -22,8 +22,6 @@ const pool = new Pool({
 });
 
 
-//console.log("Valor de pool: ", pool);
-
 async function connectToDatabase() {
   try {
     console.log("Database connected");

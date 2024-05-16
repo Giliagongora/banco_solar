@@ -12,6 +12,8 @@ const {
 const app = express();
 const PORT = 3000;
 
+app.use(express.json());
+
 app.use(bodyParser.json());
 
 app.listen(PORT, () => {
@@ -33,6 +35,7 @@ app.post("/usuario", async (req, res) => {
     // console.log("Valor devuelto por la funcion de base de datos: ", resultado);
     res.status(200).json(resultado);
   } catch (error) {
+    console.log("error", error, error.message);
     res.status(500).json({ error: error.message });
   }
 });
@@ -44,6 +47,7 @@ app.get("/usuarios", async (req, res) => {
     const resultado = await obtenerUsuarios(nombre, balance);
     res.status(200).json(resultado);
   } catch (error) {
+    console.log("error", error, error.message);
     res.status(500).json({ error: error.message });
   }
 });
@@ -54,6 +58,7 @@ app.delete('/usuario', async (req, res) => {
     const resultado = await eliminarUsuario(id);
     res.status(200).json(resultado);
   } catch (error) {
+    console.log("error", error, error.message);
     res.status(500).json({ error: error.message });
   }
 });
@@ -66,6 +71,7 @@ try{
   res.status(200).json(resultado);
   res.send(resultado)
 }catch (error) {
+  console.log("error", error, error.message);
   res.status(500).json({ error: error.message });
 }
 // console.log(actualizarUsuario(2, "Samanta", 4000)); //
@@ -76,36 +82,31 @@ app.post("/transferencia", async (req, res) => {
   try {
     const { emisor, receptor, monto } = req.body;
     console.log("emisor, receptor, monto: ", emisor, receptor, monto)
+    // res.status(200).json(resultado);
+    // res.send(resultado)
+    // return resultado;
     const resultado = await transferencia(emisor, receptor, monto);
-    res.status(200).json(resultado);
-    res.send(resultado)
+    console.log("transferencias: ", resultado);
+    res.json(resultado)
+
   } catch (error) {
+    console.log("error", error, error.message);
     res.status(500).json({ error: error.message });
   }
 }); 
 
 
 app.get("/transferencias", async (req, res) => {
-  const { emisor, receptor, monto } = req.body;
   try {
-    const resultado = await transferencias();
-    res.status(201).json(resultado);
+    const data = await transferencias();
+    // console.log('Resultado : ', data);
+    // res.status(200).json(resultado);
+    res.status(200).send(data)
   } catch (error) {
+    console.log("error", error, error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
-// app.post("/usuarios", async (req, res) => {
-//   try {
-//     const { nombre, balance } = req.body;
-//     console.log(nombre, balance);
-//     const resultado = await agregarUsuario(nombre, balance);
-//     console.log(res.json(resultado));
-//     console.log("Valor devuelto por la funcion de base de datos: ", resultado);
-//     res.status(201).json(resultado);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// });
 
 

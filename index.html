@@ -95,18 +95,18 @@
               <th>Monto</th>
             </thead>
             <tbody class="transferencias">
-              <tr>
+              <!-- <tr>
                 <td>25/01/2021 10:00</td>
                 <td>Luis Vallejo</td>
                 <td>Pedro Rivas</td>
                 <td>60.000</td>
-              </tr>
-              <tr>
+              </tr> -->
+              <!-- <tr>
                 <td>25/01/2021 13:15</td>
                 <td>Pedro Rivas</td>
                 <td>Luis Vallejo</td>
                 <td>20.000</td>
-              </tr>
+              </tr> -->
               <!-- <tr>
                 <td>25/01/2021 17:25</td>
                 <td>Luis Vallejo</td>
@@ -246,6 +246,9 @@
     try {
       const response = await fetch("http://localhost:3000/transferencia", {
         method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           emisor,
           receptor,
@@ -256,7 +259,6 @@
       location.reload();
     } catch (e) {
       console.log(e);
-      alert("Algo salió mal..." + e);
     }
   });
 
@@ -283,8 +285,8 @@
               </tr>
          `);
 
-      $("#emisor").append(`<option value="${c.nombre}">${c.nombre}</option>`);
-      $("#receptor").append(`<option value="${c.nombre}">${c.nombre}</option>`);
+      $("#emisor").append(`<option value="${c.id}">${c.nombre}</option>`);
+      $("#receptor").append(`<option value="${c.id}">${c.nombre}</option>`);
     });
   };
 
@@ -298,11 +300,13 @@
 
   const getTransferencias = async () => {
     const { data } = await axios.get("http://localhost:3000/transferencias");
+    console.log('Data en el front', data);
     $(".transferencias").html("");
 
     data.forEach((t) => {
+      console.log('t :',t);
       $(".transferencias").append(`
-       <tr>
+      <tr>
          <td> ${formatDate(t[4])} </td>
          <td> ${t[1]} </td>
          <td> ${t[2]} </td>
